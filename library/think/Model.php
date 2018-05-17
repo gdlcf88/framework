@@ -286,6 +286,8 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             } elseif (isset($this->type[$name])) {
                 // 类型转换
                 $value = $this->writeTransform($value, $this->type[$name]);
+            } elseif (is_array($value)) {
+                $value = json_encode($value, JSON_UNESCAPED_UNICODE) ?: $value;
             }
         }
 
@@ -461,6 +463,10 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
                 $this->data[$name] = $value;
             } else {
                 throw new InvalidArgumentException('property not exists:' . $this->class . '->' . $name);
+            }
+        } elseif (is_string($value)) {
+            if (in_array(substr($value, 0, 1), ['{', '['])) {
+                $value = json_decode($value, true) ?: $value;
             }
         }
         return $value;
